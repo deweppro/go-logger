@@ -25,20 +25,25 @@ func main() {
 	}
 
 	defer file.Close()
+	logger.SetOutput(file)
 
-	async := logger.NewAsync()
-	async.SetOutput(file)
-	async.Infof("async %d", 1)
-	async.Warnf("async %d", 2)
-	async.Errorf("async %d", 3)
-	async.Debugf("async %d", 4)
+	/*
+		Synchronous recording
+	*/
+	logger.Default().Sync()
+	logger.Infof("async %d", 1)
+	logger.Warnf("async %d", 2)
+	logger.Errorf("async %d", 3)
+	logger.Debugf("async %d", 4)
 
-	sync := logger.NewSync()
-	sync.SetOutput(file)
-	sync.Infof("sync %d", 1)
-	sync.Warnf("sync %d", 2)
-	sync.Errorf("sync %d", 3)
-	sync.Debugf("sync %d", 4)
+	/*
+		Asynchronous recording
+	*/
+	logger.Default().Async()
+	logger.Infof("sync %d", 1)
+	logger.Warnf("sync %d", 2)
+	logger.Errorf("sync %d", 3)
+	logger.Debugf("sync %d", 4)
 
 	<-time.After(time.Second)
 }

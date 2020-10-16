@@ -20,19 +20,21 @@ func main() {
 	}
 
 	defer file.Close()
+	logger.SetOutput(file)
 
 	/*
 		Synchronous recording
 	*/
 	logger.Default().Sync()
-	//logger.SetOutput(file)
 	logger.Infof("async %d", 1)
 	logger.Warnf("async %d", 2)
 	logger.Errorf("async %d", 3)
 	logger.Debugf("async %d", 4)
 
+	/*
+		Asynchronous recording
+	*/
 	logger.Default().Async()
-	//logger.SetOutput(file)
 	logger.Infof("sync %d", 1)
 	logger.Warnf("sync %d", 2)
 	logger.Errorf("sync %d", 3)
