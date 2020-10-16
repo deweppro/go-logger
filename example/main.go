@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	goLogger "github.com/deweppro/go-logger"
+	"github.com/deweppro/go-logger"
 )
 
 func main() {
@@ -21,19 +21,22 @@ func main() {
 
 	defer file.Close()
 
-	async := goLogger.NewAsync()
-	async.SetOutput(file)
-	async.Infof("async %d", 1)
-	async.Warnf("async %d", 2)
-	async.Errorf("async %d", 3)
-	async.Debugf("async %d", 4)
+	/*
+		Synchronous recording
+	*/
+	logger.Default().Sync()
+	//logger.SetOutput(file)
+	logger.Infof("async %d", 1)
+	logger.Warnf("async %d", 2)
+	logger.Errorf("async %d", 3)
+	logger.Debugf("async %d", 4)
 
-	sync := goLogger.NewSync()
-	sync.SetOutput(file)
-	sync.Infof("sync %d", 1)
-	sync.Warnf("sync %d", 2)
-	sync.Errorf("sync %d", 3)
-	sync.Debugf("sync %d", 4)
+	logger.Default().Async()
+	//logger.SetOutput(file)
+	logger.Infof("sync %d", 1)
+	logger.Warnf("sync %d", 2)
+	logger.Errorf("sync %d", 3)
+	logger.Debugf("sync %d", 4)
 
 	<-time.After(time.Second)
 }
