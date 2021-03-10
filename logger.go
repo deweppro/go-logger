@@ -12,7 +12,6 @@ import (
 	"io"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	p "github.com/deweppro/go-chan-pool"
@@ -26,142 +25,146 @@ var (
 	pool = &p.ChanPool{
 		Size: 64,
 		New: func() interface{} {
-			return LogMessage{}
+			return Message{}
 		},
 	}
 )
 
 type (
+	//Logger base interface
 	Logger interface {
 		SetOutput(out io.Writer)
 		Infof(format string, args ...interface{})
 		Warnf(format string, args ...interface{})
 		Errorf(format string, args ...interface{})
 		Debugf(format string, args ...interface{})
+		Fatalf(format string, args ...interface{})
 	}
 
+	//Message model
 	//easyjson:json
-	LogMessage struct {
+	Message struct {
 		Time int64  `json:"time"`
 		Type string `json:"type"`
 		Data string `json:"data"`
 	}
 
-	log struct {
+	//Log base model
+	Log struct {
 		writer io.Writer
-		async  bool
-		c      chan LogMessage
-		lock   sync.RWMutex
+		cmsg   chan []byte
+		close  chan struct{}
 	}
 )
 
-func Default() *log {
+//Default logger
+func Default() *Log {
 	return std
 }
 
-func New() *log {
-	_log := &log{
+//New init new logger
+func New() *Log {
+	l := &Log{
 		writer: os.Stdout,
-		async:  false,
-		c:      make(chan LogMessage, runtime.GOMAXPROCS(0)*512),
+		cmsg:   make(chan []byte, runtime.GOMAXPROCS(0)*1024),
+		close:  make(chan struct{}),
 	}
-	go _log.routine()
-	return _log
+	go l.queue()
+	return l
 }
 
-func (_log *log) Sync() {
-	_log.lock.Lock()
-	defer _log.lock.Unlock()
-
-	_log.async = false
-}
-
-func (_log *log) Async() {
-	_log.lock.Lock()
-	defer _log.lock.Unlock()
-
-	_log.async = true
-}
-
-func (_log *log) is() bool {
-	_log.lock.RLock()
-	defer _log.lock.RUnlock()
-
-	return _log.async
-}
-
-func (_log *log) send(level, format string, args ...interface{}) {
-	m := pool.Get().(LogMessage)
+func (l *Log) send(level, format string, args ...interface{}) {
+	m := pool.Get().(Message)
 	m.Type, m.Time, m.Data = level, time.Now().Unix(), fmt.Sprintf(format, args...)
-
-	if _log.is() {
-		select {
-		case _log.c <- m:
-		default:
-			pool.Put(m)
-		}
-	} else {
-		_log.write(m)
-	}
-}
-
-func (_log *log) write(m LogMessage) {
-	_log.lock.RLock()
-	defer _log.lock.RUnlock()
 
 	b, err := json.Marshal(m)
 	if err != nil {
 		b = []byte(err.Error())
 	}
-	_, _ = _log.writer.Write(append(b, nl...))
+
+	select {
+	case l.cmsg <- b:
+	default:
+	}
+
 	pool.Put(m)
 }
 
-func (_log *log) routine() {
-	for m := range _log.c {
-		_log.write(m)
+func (l *Log) write(b []byte) {
+	_, _ = l.writer.Write(append(b, nl...))
+}
+
+func (l *Log) queue() {
+	for {
+		select {
+		case m, ok := <-l.cmsg:
+			if ok {
+				l.write(m)
+			} else {
+				close(l.close)
+				return
+			}
+		}
 	}
 }
 
-func (_log *log) SetOutput(out io.Writer) {
-	_log.lock.Lock()
-	defer _log.lock.Unlock()
-
-	_log.writer = out
+//Close waiting for all messages to finish recording
+func (l *Log) Close() {
+	close(l.cmsg)
+	<-l.close
 }
 
-func (_log *log) Infof(format string, args ...interface{}) {
-	_log.send("INF", format, args...)
+//SetOutput change writer
+func (l *Log) SetOutput(out io.Writer) {
+	l.writer = out
 }
 
-func (_log *log) Warnf(format string, args ...interface{}) {
-	_log.send("WRN", format, args...)
+//Infof info message
+func (l *Log) Infof(format string, args ...interface{}) {
+	l.send("INF", format, args...)
 }
 
-func (_log *log) Errorf(format string, args ...interface{}) {
-	_log.send("ERR", format, args...)
+//Warnf warning message
+func (l *Log) Warnf(format string, args ...interface{}) {
+	l.send("WRN", format, args...)
 }
 
-func (_log *log) Debugf(format string, args ...interface{}) {
-	_log.send("DBG", format, args...)
+//Errorf error message
+func (l *Log) Errorf(format string, args ...interface{}) {
+	l.send("ERR", format, args...)
 }
 
+//Debugf debug message
+func (l *Log) Debugf(format string, args ...interface{}) {
+	l.send("DBG", format, args...)
+}
+
+//SetOutput change writer
 func SetOutput(out io.Writer) {
 	std.SetOutput(out)
 }
 
+//Close waiting for all messages to finish recording
+func Close() {
+	std.Close()
+}
+
+//Infof info message
 func Infof(format string, args ...interface{}) {
 	std.Infof(format, args...)
 }
 
+//Warnf warning message
 func Warnf(format string, args ...interface{}) {
 	std.Warnf(format, args...)
 }
 
+//Errorf error message
 func Errorf(format string, args ...interface{}) {
 	std.Errorf(format, args...)
 }
 
+//Debugf debug message
 func Debugf(format string, args ...interface{}) {
 	std.Debugf(format, args...)
 }

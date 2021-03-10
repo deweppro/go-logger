@@ -9,8 +9,8 @@ package logger
 import (
 	"io/ioutil"
 	"os"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -24,17 +24,16 @@ func TestNew(t *testing.T) {
 
 	SetOutput(filename)
 
-	log.Async()
 	Infof("async %d", 1)
 	Warnf("async %d", 2)
 	Errorf("async %d", 3)
 	Debugf("async %d", 4)
-	<-time.After(time.Second)
-	log.Sync()
 	Infof("sync %d", 1)
 	Warnf("sync %d", 2)
 	Errorf("sync %d", 3)
 	Debugf("sync %d", 4)
+
+	log.Close()
 
 	require.NoError(t, filename.Close())
 	data, err := ioutil.ReadFile(filename.Name())
@@ -50,4 +49,23 @@ func TestNew(t *testing.T) {
 	require.Contains(t, sdata, "\"type\":\"WRN\",\"data\":\"sync 2\"")
 	require.Contains(t, sdata, "\"type\":\"ERR\",\"data\":\"sync 3\"")
 	require.Contains(t, sdata, "\"type\":\"DBG\",\"data\":\"sync 4\"")
+}
+
+func BenchmarkNew(b *testing.B) {
+	b.ReportAllocs()
+
+	ll := New()
+	ll.SetOutput(ioutil.Discard)
+	wg := sync.WaitGroup{}
+
+	b.ResetTimer()
+	b.RunParallel(func(p *testing.PB) {
+		wg.Add(1)
+		for p.Next() {
+			ll.Infof("hello")
+		}
+		wg.Done()
+	})
+	wg.Wait()
+	ll.Close()
 }
