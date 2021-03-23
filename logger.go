@@ -30,6 +30,8 @@ var (
 	}
 )
 
+var _ Logger = (*Log)(nil)
+
 type (
 	//Logger base interface
 	Logger interface {
@@ -38,7 +40,6 @@ type (
 		Warnf(format string, args ...interface{})
 		Errorf(format string, args ...interface{})
 		Debugf(format string, args ...interface{})
-		Fatalf(format string, args ...interface{})
 	}
 
 	//Message model
