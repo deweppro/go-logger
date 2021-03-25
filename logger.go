@@ -12,12 +12,21 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	p "github.com/deweppro/go-chan-pool"
 )
 
 //go:generate easyjson
+
+//nolint: golint
+const (
+	LevelError uint32 = iota
+	LevelWarn
+	LevelInfo
+	LevelDebug
+)
 
 var (
 	nl   = []byte("\n")
@@ -32,13 +41,16 @@ var (
 
 var _ Logger = (*Log)(nil)
 
+//var _ Logger = logrus.New().SetLevel()
+
 type (
 	//Logger base interface
 	Logger interface {
 		SetOutput(out io.Writer)
-		Infof(format string, args ...interface{})
-		Warnf(format string, args ...interface{})
+		Fatalf(format string, args ...interface{})
 		Errorf(format string, args ...interface{})
+		Warnf(format string, args ...interface{})
+		Infof(format string, args ...interface{})
 		Debugf(format string, args ...interface{})
 	}
 
@@ -52,6 +64,7 @@ type (
 
 	//Log base model
 	Log struct {
+		status uint32
 		writer io.Writer
 		cmsg   chan []byte
 		close  chan struct{}
@@ -66,6 +79,7 @@ func Default() *Log {
 //New init new logger
 func New() *Log {
 	l := &Log{
+		status: LevelError,
 		writer: os.Stdout,
 		cmsg:   make(chan []byte, runtime.GOMAXPROCS(0)*1024),
 		close:  make(chan struct{}),
@@ -120,14 +134,28 @@ func (l *Log) SetOutput(out io.Writer) {
 	l.writer = out
 }
 
+//SetLevel change log level
+func (l *Log) SetLevel(v uint32) {
+	atomic.StoreUint32(&l.status, v)
+}
+
+//GetLevel getting log level
+func (l *Log) GetLevel() uint32 {
+	return atomic.LoadUint32(&l.status)
+}
+
 //Infof info message
 func (l *Log) Infof(format string, args ...interface{}) {
-	l.send("INF", format, args...)
+	if atomic.LoadUint32(&l.status) >= LevelInfo {
+		l.send("INF", format, args...)
+	}
 }
 
 //Warnf warning message
 func (l *Log) Warnf(format string, args ...interface{}) {
-	l.send("WRN", format, args...)
+	if atomic.LoadUint32(&l.status) >= LevelWarn {
+		l.send("WRN", format, args...)
+	}
 }
 
 //Errorf error message
@@ -137,12 +165,31 @@ func (l *Log) Errorf(format string, args ...interface{}) {
 
 //Debugf debug message
 func (l *Log) Debugf(format string, args ...interface{}) {
-	l.send("DBG", format, args...)
+	if atomic.LoadUint32(&l.status) >= LevelDebug {
+		l.send("DBG", format, args...)
+	}
+}
+
+//Fatalf fatal message and exit
+func (l *Log) Fatalf(format string, args ...interface{}) {
+	l.send("FAT", format, args...)
+	l.Close()
+	os.Exit(1)
 }
 
 //SetOutput change writer
 func SetOutput(out io.Writer) {
 	std.SetOutput(out)
+}
+
+//SetLevel change log level
+func SetLevel(v uint32) {
+	std.SetLevel(v)
+}
+
+//GetLevel getting log level
+func GetLevel() uint32 {
+	return std.GetLevel()
 }
 
 //Close waiting for all messages to finish recording
@@ -168,4 +215,9 @@ func Errorf(format string, args ...interface{}) {
 //Debugf debug message
 func Debugf(format string, args ...interface{}) {
 	std.Debugf(format, args...)
+}
+
+//Fatalf fatal message and exit
+func Fatalf(format string, args ...interface{}) {
+	std.Fatalf(format, args...)
 }

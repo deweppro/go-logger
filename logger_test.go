@@ -23,6 +23,7 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 
 	SetOutput(filename)
+	SetLevel(LevelDebug)
 
 	Infof("async %d", 1)
 	Warnf("async %d", 2)
@@ -56,6 +57,7 @@ func BenchmarkNew(b *testing.B) {
 
 	ll := New()
 	ll.SetOutput(ioutil.Discard)
+	ll.SetLevel(LevelDebug)
 	wg := sync.WaitGroup{}
 
 	b.ResetTimer()
