@@ -41,17 +41,17 @@ var (
 
 var _ Logger = (*Log)(nil)
 
-//var _ Logger = logrus.New().SetLevel()
-
 type (
 	//Logger base interface
 	Logger interface {
 		SetOutput(out io.Writer)
+		SetLevel(v uint32)
 		Fatalf(format string, args ...interface{})
 		Errorf(format string, args ...interface{})
 		Warnf(format string, args ...interface{})
 		Infof(format string, args ...interface{})
 		Debugf(format string, args ...interface{})
+		Close()
 	}
 
 	//Message model
