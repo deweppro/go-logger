@@ -13,18 +13,19 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/deweppro/go-logger"
 )
 
 func main() {
 	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logger.LevelDebug)
 
-	logger.Infof("sync %d", 1)
-	logger.Warnf("sync %d", 2)
-	logger.Errorf("sync %d", 3)
-	logger.Debugf("sync %d", 4)
+	logger.Infof("log %s", "info")
+	logger.Warnf("log %s", "warn")
+	logger.Errorf("log %s", "error")
+	logger.Debugf("log %s", "debug")
+	logger.WithFields(logger.Fields{"a": "b"}).Infof("with context")
 
 	logger.Close()
 }
@@ -32,9 +33,11 @@ func main() {
 
 Example log output:
 ```json
-{"time":1602721013,"type":"INF","data":"sync 1"}
-{"time":1602721013,"type":"WRN","data":"sync 2"}
-{"time":1602721013,"type":"ERR","data":"sync 3"}
-{"time":1602721013,"type":"DBG","data":"sync 4"}
+{"time":1649896276,"lvl":"INF","msg":"log info"}
+{"time":1649896276,"lvl":"WRN","msg":"log warn"}
+{"time":1649896276,"lvl":"ERR","msg":"log error"}
+{"time":1649896276,"lvl":"DBG","msg":"log debug"}
+{"time":1649896276,"lvl":"INF","msg":"with context","ctx":{"a":"b"}}
+
 ...
 ```

@@ -8,15 +8,13 @@ import (
 
 func main() {
 	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logger.LevelDebug)
 
-	logger.Infof("async %d", 1)
-	logger.Warnf("async %d", 2)
-	logger.Errorf("async %d", 3)
-	logger.Debugf("async %d", 4)
-	logger.Infof("sync %d", 1)
-	logger.Warnf("sync %d", 2)
-	logger.Errorf("sync %d", 3)
-	logger.Debugf("sync %d", 4)
+	logger.Infof("log %s", "info")
+	logger.Warnf("log %s", "warn")
+	logger.Errorf("log %s", "error")
+	logger.Debugf("log %s", "debug")
+	logger.WithFields(logger.Fields{"a": "b"}).Infof("with context")
 
 	logger.Close()
 }
