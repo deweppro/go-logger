@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/deweppro/go-logger/badge.svg?branch=main)](https://coveralls.io/github/deweppro/go-logger?branch=main)
 [![Release](https://img.shields.io/github/release/deweppro/go-logger.svg?style=flat-square)](https://github.com/deweppro/go-logger/releases/latest)
 [![Go Report Card](https://goreportcard.com/badge/github.com/deweppro/go-logger)](https://goreportcard.com/report/github.com/deweppro/go-logger)
-[![Build Status](https://travis-ci.com/deweppro/go-logger.svg?branch=main)](https://travis-ci.com/deweppro/go-logger)
+[![CI](https://github.com/deweppro/go-logger/actions/workflows/ci.yml/badge.svg)](https://github.com/deweppro/go-logger/actions/workflows/ci.yml)
 
 
 # How to use it
