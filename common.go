@@ -2,7 +2,7 @@ package logger
 
 import "io"
 
-//nolint: golint
+// nolint: golint
 const (
 	levelFatal uint32 = iota
 	LevelError
@@ -27,7 +27,7 @@ type Sender interface {
 	Close()
 }
 
-//LogWriter writer interface
+// LogWriter writer interface
 type LogWriter interface {
 	Fatalf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
@@ -36,7 +36,7 @@ type LogWriter interface {
 	Debugf(format string, args ...interface{})
 }
 
-//Logger base interface
+// Logger base interface
 type Logger interface {
 	SetOutput(out io.Writer)
 	SetLevel(v uint32)

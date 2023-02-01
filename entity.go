@@ -49,27 +49,27 @@ func (e *entity) prepareMessage(format string, args ...interface{}) func(v *mess
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Infof info message
+// Infof info message
 func (e *entity) Infof(format string, args ...interface{}) {
 	e.log.SendMessage(LevelInfo, e.prepareMessage(format, args...))
 }
 
-//Warnf warning message
+// Warnf warning message
 func (e *entity) Warnf(format string, args ...interface{}) {
 	e.log.SendMessage(LevelWarn, e.prepareMessage(format, args...))
 }
 
-//Errorf error message
+// Errorf error message
 func (e *entity) Errorf(format string, args ...interface{}) {
 	e.log.SendMessage(LevelError, e.prepareMessage(format, args...))
 }
 
-//Debugf debug message
+// Debugf debug message
 func (e *entity) Debugf(format string, args ...interface{}) {
 	e.log.SendMessage(LevelDebug, e.prepareMessage(format, args...))
 }
 
-//Fatalf fatal message and exit
+// Fatalf fatal message and exit
 func (e *entity) Fatalf(format string, args ...interface{}) {
 	e.log.SendMessage(levelFatal, e.prepareMessage(format, args...))
 	e.log.Close()

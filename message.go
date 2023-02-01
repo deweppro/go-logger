@@ -1,15 +1,12 @@
 package logger
 
+import "sync"
+
 //go:generate easyjson
 
-import p "github.com/deweppro/go-chan-pool"
-
-var poolMessage = &p.ChanPool{
-	Size: 1024,
+var poolMessage = sync.Pool{
 	New: func() interface{} {
-		return message{
-			Ctx: make(map[string]interface{}),
-		}
+		return newMessage()
 	},
 }
 
@@ -21,7 +18,13 @@ type message struct {
 	Ctx     map[string]interface{} `json:"ctx,omitempty"`
 }
 
-func (v message) Reset() {
+func newMessage() *message {
+	return &message{
+		Ctx: make(map[string]interface{}),
+	}
+}
+
+func (v *message) Reset() {
 	v.Time = 0
 	v.Level = ""
 	v.Message = ""
