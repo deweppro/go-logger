@@ -4,34 +4,30 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	p "github.com/deweppro/go-chan-pool"
 )
 
 var nl = byte('\n')
 
-//log base model
+// log base model
 type log struct {
 	status   uint32
 	writer   io.Writer
-	entities *p.ChanPool
+	entities sync.Pool
 	channel  chan []byte
 	wg       sync.WaitGroup
 }
 
-//New init new logger
+// New init new logger
 func New() Logger {
 	object := &log{
 		status:  LevelError,
 		writer:  os.Stdout,
-		channel: make(chan []byte, runtime.GOMAXPROCS(0)*1024),
+		channel: make(chan []byte, 1024),
 	}
-	object.entities = &p.ChanPool{
-		Size: 1024,
+	object.entities = sync.Pool{
 		New: func() interface{} {
 			return newEntity(object)
 		},
@@ -99,53 +95,53 @@ func (l *log) PutEntity(v *entity) {
 	l.entities.Put(v)
 }
 
-//Close waiting for all messages to finish recording
+// Close waiting for all messages to finish recording
 func (l *log) Close() {
 	l.channel <- nil
 	l.wg.Wait()
 }
 
-//SetOutput change writer
+// SetOutput change writer
 func (l *log) SetOutput(out io.Writer) {
 	l.writer = out
 }
 
-//SetLevel change log level
+// SetLevel change log level
 func (l *log) SetLevel(v uint32) {
 	atomic.StoreUint32(&l.status, v)
 }
 
-//GetLevel getting log level
+// GetLevel getting log level
 func (l *log) GetLevel() uint32 {
 	return atomic.LoadUint32(&l.status)
 }
 
-//Infof info message
+// Infof info message
 func (l *log) Infof(format string, args ...interface{}) {
 	l.getEntity().Infof(format, args...)
 }
 
-//Warnf warning message
+// Warnf warning message
 func (l *log) Warnf(format string, args ...interface{}) {
 	l.getEntity().Warnf(format, args...)
 }
 
-//Errorf error message
+// Errorf error message
 func (l *log) Errorf(format string, args ...interface{}) {
 	l.getEntity().Errorf(format, args...)
 }
 
-//Debugf debug message
+// Debugf debug message
 func (l *log) Debugf(format string, args ...interface{}) {
 	l.getEntity().Debugf(format, args...)
 }
 
-//Fatalf fatal message and exit
+// Fatalf fatal message and exit
 func (l *log) Fatalf(format string, args ...interface{}) {
 	l.getEntity().Fatalf(format, args...)
 }
 
-//WithFields setter context to log message
+// WithFields setter context to log message
 func (l *log) WithFields(v Fields) LogWriter {
 	return l.getEntity().WithFields(v)
 }

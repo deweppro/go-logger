@@ -4,57 +4,57 @@ import "io"
 
 var std = New()
 
-//Default logger
+// Default logger
 func Default() Logger {
 	return std
 }
 
-//SetOutput change writer
+// SetOutput change writer
 func SetOutput(out io.Writer) {
 	std.SetOutput(out)
 }
 
-//SetLevel change log level
+// SetLevel change log level
 func SetLevel(v uint32) {
 	std.SetLevel(v)
 }
 
-//GetLevel getting log level
+// GetLevel getting log level
 func GetLevel() uint32 {
 	return std.GetLevel()
 }
 
-//Close waiting for all messages to finish recording
+// Close waiting for all messages to finish recording
 func Close() {
 	std.Close()
 }
 
-//Infof info message
+// Infof info message
 func Infof(format string, args ...interface{}) {
 	std.Infof(format, args...)
 }
 
-//Warnf warning message
+// Warnf warning message
 func Warnf(format string, args ...interface{}) {
 	std.Warnf(format, args...)
 }
 
-//Errorf error message
+// Errorf error message
 func Errorf(format string, args ...interface{}) {
 	std.Errorf(format, args...)
 }
 
-//Debugf debug message
+// Debugf debug message
 func Debugf(format string, args ...interface{}) {
 	std.Debugf(format, args...)
 }
 
-//Fatalf fatal message and exit
+// Fatalf fatal message and exit
 func Fatalf(format string, args ...interface{}) {
 	std.Fatalf(format, args...)
 }
 
-//WithFields setter context to log message
+// WithFields setter context to log message
 func WithFields(v Fields) LogWriter {
 	return std.WithFields(v)
 }
