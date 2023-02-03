@@ -1,6 +1,6 @@
 # go-logger
 
-# Deprecated. Use https://github.com/deweppro/go-sdk
+## Deprecated. Use https://github.com/deweppro/go-sdk
 
 # How to use it
 
