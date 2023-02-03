@@ -1,10 +1,6 @@
 # go-logger
 
-[![Coverage Status](https://coveralls.io/repos/github/deweppro/go-logger/badge.svg?branch=main)](https://coveralls.io/github/deweppro/go-logger?branch=main)
-[![Release](https://img.shields.io/github/release/deweppro/go-logger.svg?style=flat-square)](https://github.com/deweppro/go-logger/releases/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/deweppro/go-logger)](https://goreportcard.com/report/github.com/deweppro/go-logger)
-[![CI](https://github.com/deweppro/go-logger/actions/workflows/ci.yml/badge.svg)](https://github.com/deweppro/go-logger/actions/workflows/ci.yml)
-
+# Deprecated. Use https://github.com/deweppro/go-sdk
 
 # How to use it
 
